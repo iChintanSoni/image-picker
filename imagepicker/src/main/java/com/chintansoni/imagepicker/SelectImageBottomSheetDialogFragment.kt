@@ -3,6 +3,7 @@ package com.chintansoni.imagepicker
 import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -10,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
+import androidx.core.net.toFile
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.dialog_image_picker.*
 import pub.devrel.easypermissions.AppSettingsDialog
@@ -22,45 +24,17 @@ import java.util.*
 
 class SelectImageBottomSheetDialogFragment : BottomSheetDialogFragment(), EasyPermissions.PermissionCallbacks {
 
-
-    private var photoURI: Uri? = null
-
-    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
-        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
-            AppSettingsDialog.Builder(this).build().show()
-        } else {
-            dismiss()
-        }
-    }
-
-    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
-
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
-            // Do something after user returned from app settings screen, like showing a Toast.
-            if (!EasyPermissions.hasPermissions(requireContext(), *perms)) {
-                dismiss()
-            }
-        } else if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            photoURI?.let {
-                listener(Result.Success(it))
-                dismiss()
-            }
-        }
-    }
-
-    private var listener: (Result<Uri>) -> Unit = {}
-    private var configuration: Configuration? = null
-
-    private val perms = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+    private var mPhotoUri: Uri? = null
+    private var mListener: (Result) -> Unit = {}
+    private var mConfiguration: Configuration? = null
 
     companion object {
-        const val REQUEST_TAKE_PHOTO = 101
-        const val TAG = "SelectImageBottomSheetDialogFragment"
         const val RC_EXTERNAL_STORAGE = 100
+        const val REQUEST_TAKE_PHOTO = 101
+        const val REQUEST_PICK_PHOTO = 102
+        const val TAG = "SelectImageBottomSheetDialogFragment"
+        val perms = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+
         fun newInstance(configuration: Configuration): SelectImageBottomSheetDialogFragment =
             SelectImageBottomSheetDialogFragment().apply {
                 arguments = configuration.toBundle()
@@ -70,7 +44,7 @@ class SelectImageBottomSheetDialogFragment : BottomSheetDialogFragment(), EasyPe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            configuration = Configuration.fromBundle(it)
+            mConfiguration = Configuration.fromBundle(it)
         }
         askReadExternalStoragePermission()
     }
@@ -90,34 +64,38 @@ class SelectImageBottomSheetDialogFragment : BottomSheetDialogFragment(), EasyPe
     }
 
     private fun openGallery() {
-        listener.invoke(Result.Failure(Throwable("Open Gallery")))
-    }
-
-    private fun openCamera() {
-        dispatchTakePictureIntent()
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
-    }
-
-    private fun askReadExternalStoragePermission() {
-        if (EasyPermissions.hasPermissions(requireContext(), *perms)) {
-
-        } else {
-            // Do not have permissions, request them now
-            EasyPermissions.requestPermissions(
-                this,
-                configuration?.rationaleText.toString(),
-                RC_EXTERNAL_STORAGE,
-                *perms
-            )
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "image/*"
+        }
+        if (intent.resolveActivity(requireContext().packageManager) != null) {
+            startActivityForResult(intent, REQUEST_PICK_PHOTO)
         }
     }
 
-    fun setImageListener(function: (Result<Uri>) -> Unit) {
-        this.listener = function
+    private fun openCamera() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            takePictureIntent.resolveActivity(requireContext().packageManager)?.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    // Error occurred while creating the File
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    mPhotoUri =
+                        FileProvider.getUriForFile(requireContext(), "com.chintansoni.imagepicker.fileprovider", it)
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri)
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
+                }
+            }
+        }
+    }
+
+    fun setListener(function: (Result) -> Unit) {
+        this.mListener = function
     }
 
     @Throws(IOException::class)
@@ -133,25 +111,71 @@ class SelectImageBottomSheetDialogFragment : BottomSheetDialogFragment(), EasyPe
         )
     }
 
-    private fun dispatchTakePictureIntent() {
-        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            // Ensure that there's a camera activity to handle the intent
-            takePictureIntent.resolveActivity(requireContext().packageManager)?.also {
-                // Create the File where the photo should go
-                val photoFile: File? = try {
-                    createImageFile()
-                } catch (ex: IOException) {
-                    // Error occurred while creating the File
-                    null
-                }
-                // Continue only if the File was successfully created
-                photoFile?.also {
-                    photoURI =
-                        FileProvider.getUriForFile(requireContext(), "com.chintansoni.imagepicker.fileprovider", it)
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
-                }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
+            // Do something after user returned from app settings screen, like showing a Toast.
+            if (!EasyPermissions.hasPermissions(requireContext(), *perms)) {
+                dismiss()
+            }
+        } else if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            mPhotoUri?.let {
+                processResultForUri(it)
+            }
+            dismiss()
+        } else if (requestCode == REQUEST_PICK_PHOTO && resultCode == RESULT_OK) {
+            data?.data?.let {
+                processResultForUri(it)
+            }
+            dismiss()
+        }
+    }
+
+    private fun processResultForUri(uri: Uri) {
+        when (mConfiguration?.target) {
+            is Target.UriTarget -> {
+                mListener(Result.Success(Output.UriOutput(uri)))
+            }
+            is Target.FileTarget -> {
+                mListener(Result.Success(Output.FileOutput(uri.toFile())))
+            }
+            is Target.BitmapTarget -> {
+                val inputStream = requireContext().contentResolver.openInputStream(uri)
+                mListener(Result.Success(Output.BitmapOutput(BitmapFactory.decodeStream(inputStream))))
             }
         }
     }
+
+    // [Start] Permission Model
+    private fun askReadExternalStoragePermission() {
+        if (EasyPermissions.hasPermissions(requireContext(), *perms)) {
+
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(
+                this,
+                mConfiguration?.rationaleText.toString(),
+                RC_EXTERNAL_STORAGE,
+                *perms
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            AppSettingsDialog.Builder(this).build().show()
+        } else {
+            dismiss()
+        }
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+
+    }
+    // [End] Permission Model
 }

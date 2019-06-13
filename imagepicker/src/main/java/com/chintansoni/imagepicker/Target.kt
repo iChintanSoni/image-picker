@@ -3,7 +3,6 @@ package com.chintansoni.imagepicker
 sealed class Target(val type: String) {
     object FileTarget : Target("file")
     object UriTarget : Target("uri")
-    object Base64Target : Target("base64")
     object BitmapTarget : Target("bitmap")
     object Undefined : Target("undefined")
 
@@ -12,7 +11,6 @@ sealed class Target(val type: String) {
             return when (type) {
                 "file" -> FileTarget
                 "uri" -> UriTarget
-                "base64" -> Base64Target
                 "bitmap" -> BitmapTarget
                 else -> Undefined
             }

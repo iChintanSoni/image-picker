@@ -1,6 +1,6 @@
 package com.chintansoni.imagepicker
 
-sealed class Result<T> {
-    data class Success<T>(val data: T) : Result<T>()
-    data class Failure<T>(val throwable: Throwable) : Result<T>()
+sealed class Result {
+    data class Success(val output: Output) : Result()
+    data class Failure(val throwable: Throwable) : Result()
 }
