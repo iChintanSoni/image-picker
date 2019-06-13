@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    app:layout_behavior="@string/bottom_sheet_behavior"
+    tools:background="@android:color/white">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="Select Image"
+        android:textSize="16sp"
+        app:firstBaselineToTopHeight="36dp"
+        app:lastBaselineToBottomHeight="20dp" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_camera"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableStart="@drawable/ic_camera"
+        android:drawablePadding="32dp"
+        android:gravity="start|center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="Camera"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        app:firstBaselineToTopHeight="36dp"
+        app:lastBaselineToBottomHeight="20dp" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_gallery"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableStart="@drawable/ic_gallery"
+        android:drawablePadding="32dp"
+        android:gravity="start|center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="Gallery"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        app:firstBaselineToTopHeight="36dp"
+        app:lastBaselineToBottomHeight="20dp" />
+
+</LinearLayout>
