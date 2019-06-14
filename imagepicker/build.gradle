@@ -1,10 +1,12 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.github.ichintansoni'
 
 android {
     compileSdkVersion 29
-
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 29
