@@ -9,11 +9,10 @@ import com.chintansoni.imagepicker.Configuration
 import com.chintansoni.imagepicker.ImagePicker
 import com.chintansoni.imagepicker.Output
 import com.chintansoni.imagepicker.Result
+import com.chintansoni.imagepicker.Target
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
-
-    private val configuration = Configuration()
     private val imagePicker = ImagePicker()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,7 +20,22 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    fun onImageClick(view: View) {
+    fun onImageAsFileClick(view: View) {
+        val configuration = Configuration(target = Target.FileTarget)
+        getImage(configuration)
+    }
+
+    fun onImageAsUriClick(view: View) {
+        val configuration = Configuration(target = Target.UriTarget)
+        getImage(configuration)
+    }
+
+    fun onImageAsBitmapClick(view: View) {
+        val configuration = Configuration(target = Target.BitmapTarget)
+        getImage(configuration)
+    }
+
+    private fun getImage(configuration: Configuration) {
         imagePicker.getImage(this, configuration) {
             when (it) {
                 is Result.Success -> {

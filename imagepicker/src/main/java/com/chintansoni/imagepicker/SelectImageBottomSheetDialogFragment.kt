@@ -11,13 +11,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
-import androidx.core.net.toFile
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.dialog_image_picker.*
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -104,11 +104,7 @@ class SelectImageBottomSheetDialogFragment : BottomSheetDialogFragment(), EasyPe
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val storageDir = File(requireContext().cacheDir, "cameraPics")
         storageDir.mkdirs()
-        return File.createTempFile(
-            "JPEG_${timeStamp}_", /* prefix */
-            ".jpg", /* suffix */
-            storageDir /* directory */
-        )
+        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -137,11 +133,27 @@ class SelectImageBottomSheetDialogFragment : BottomSheetDialogFragment(), EasyPe
                 mListener(Result.Success(Output.UriOutput(uri)))
             }
             is Target.FileTarget -> {
-                mListener(Result.Success(Output.FileOutput(uri.toFile())))
+                mListener(Result.Success(Output.FileOutput(getFileFromUri(uri))))
             }
             is Target.BitmapTarget -> {
                 val inputStream = requireContext().contentResolver.openInputStream(uri)
                 mListener(Result.Success(Output.BitmapOutput(BitmapFactory.decodeStream(inputStream))))
+            }
+        }
+    }
+
+    private fun getFileFromUri(uri: Uri): File {
+        val file = createImageFile()
+        requireContext().contentResolver.openInputStream(uri)?.let {
+            file.copyInputStreamToFile(it)
+        }
+        return file
+    }
+
+    private fun File.copyInputStreamToFile(inputStream: InputStream) {
+        inputStream.use { input ->
+            this.outputStream().use { fileOut ->
+                input.copyTo(fileOut)
             }
         }
     }
