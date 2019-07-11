@@ -26,6 +26,59 @@ allprojects {
 	    implementation ‘com.github.iChintanSoni:image-picker:1.0.0’
 	}
   ```
+## Usage
+
+#### Apply desired output format in `Configuration`:
+```kotlin
+// If you want File as output
+val configuration = Configuration(target = Target.FileTarget)
+
+// If you want Uri as output
+val configuration = Configuration(target = Target.UriTarget)
+
+// If you want Bitmap as output
+val configuration = Configuration(target = Target.BitmapTarget)
+```
+
+#### Get image in your Activity/Fragment:
+```kotlin
+imagePicker.getImage(this, configuration) {
+    when (it) {
+        is Result.Success -> {
+            processResult(it.output)
+        }
+        is Result.Failure -> {
+            Toast.makeText(this, it.throwable.message, Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+```
+#### Process the output:
+```kotlin
+private fun processResult(output: Output) {
+    when (output) {
+        is Output.FileOutput -> {
+            Glide
+                .with(this)
+                .load(output.data)
+                .into(imageView)
+        }
+        is Output.UriOutput -> {
+            Glide
+                .with(this)
+                .load(output.data)
+                .into(imageView)
+        }
+        is Output.BitmapOutput -> {
+            Glide
+                .with(this)
+                .load(output.data)
+                .into(imageView)
+        }
+    }
+}
+```
+  
 # License
 
 ```
