@@ -23,7 +23,7 @@ allprojects {
 *Step 2.* Add the dependency
   ```groovy
 	dependencies {
-	    implementation ‘com.github.iChintanSoni:image-picker:1.0.0’
+	    implementation ‘com.github.iChintanSoni:image-picker:v1.0.2’
 	}
   ```
 ## Usage
