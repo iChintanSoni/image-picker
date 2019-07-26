@@ -102,7 +102,7 @@ class SelectImageBottomSheetDialogFragment : BottomSheetDialogFragment(), EasyPe
                 // Continue only if the File was successfully created
                 photoFile?.also {
                     mPhotoUri =
-                        FileProvider.getUriForFile(requireContext(), "com.chintansoni.imagepicker.fileprovider", it)
+                        FileProvider.getUriForFile(requireContext(), BuildConfig.APPLICATION_ID + ".fileprovider", it)
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mPhotoUri)
                     startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
                 }
