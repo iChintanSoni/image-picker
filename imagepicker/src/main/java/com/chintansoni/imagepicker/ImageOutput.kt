@@ -16,12 +16,29 @@
 
 package com.chintansoni.imagepicker
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.core.content.FileProvider
 import java.io.File
 
-sealed class Output {
-    data class FileOutput(val data: File) : Output()
-    data class UriOutput(val data: Uri) : Output()
-    data class BitmapOutput(val data: Bitmap) : Output()
+/*
+ * Created by Birju Vachhani on 26 July 2019
+ * Copyright © 2019 image-picker. All rights reserved.
+ */
+
+class ImageOutput internal constructor(context: Context, private val file: File) {
+
+    private val fileUri: Uri by lazy {
+        FileProvider.getUriForFile(context, context.packageName + ".fileprovider", file)
+    }
+
+    fun getUri(): Uri = fileUri
+
+    fun getBitmap(): Bitmap = BitmapFactory.decodeFile(file.absolutePath)
+
+    fun getFile(): File {
+        return file
+    }
 }

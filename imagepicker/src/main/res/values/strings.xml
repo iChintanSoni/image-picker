@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">imagepicker</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="cancel">Cancel</string>
 </resources>
