@@ -16,7 +16,16 @@
 
 package com.chintansoni.imagepicker
 
-sealed class Result {
-    data class Success(val output: Output) : Result()
-    data class Failure(val throwable: Throwable) : Result()
+class ImageTask internal constructor() {
+
+    internal var onFailureFunc: (Throwable) -> Unit = {}
+    internal var onSuccessFunc: (ImageOutput) -> Unit = {}
+
+    fun onFailure(func: (Throwable) -> Unit): ImageTask = apply {
+        onFailureFunc = func
+    }
+
+    fun onSuccess(func: (ImageOutput) -> Unit): ImageTask = apply {
+        onSuccessFunc = func
+    }
 }

@@ -16,25 +16,17 @@
 
 package com.chintansoni.imagepicker
 
-import android.os.Bundle
-import androidx.core.os.bundleOf
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
-data class Configuration(
-    var target: Target = Target.UriTarget,
-    val rationaleText: String = "This app needs permission to read external storage."
-) {
-    fun toBundle(): Bundle {
-        return bundleOf(
-            "target" to target.toString(),
-            "rationaleText" to rationaleText
-        )
-    }
+/*
+ * Created by Birju Vachhani on 26 July 2019
+ * Copyright © 2019 image-picker. All rights reserved.
+ */
 
-    companion object {
-        fun fromBundle(bundle: Bundle): Configuration {
-            val target = Target.from(bundle.getString("target") ?: "")
-            val rationaleText = bundle.getString("rationaleText") ?: ""
-            return Configuration(target, rationaleText)
-        }
-    }
-}
+@Parcelize
+data class Configuration internal constructor(
+    var rationaleText: String = "This app needs permission to read external storage.",
+    var blockedTitle: String = "Storage permission Blocked",
+    var blockedText: String = "This app needs permission to read external storage."
+) : Parcelable
