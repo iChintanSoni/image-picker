@@ -58,8 +58,8 @@ imagePicker.configure {
 }
 ```
 
-# License
 
+# License
 ```
    Copyright © 2019 Chintan Soni
 
