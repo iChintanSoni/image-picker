@@ -9,8 +9,8 @@
 
     <application>
         <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
+            android:name=".ImagePickerProvider"
+            android:authorities="${applicationId}.imagepicker.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
