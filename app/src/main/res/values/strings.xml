@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Image Picker Sample</string>
+    <string name="facebook_app_id">292636221125381</string>
+    <string name="fb_login_protocol_scheme">fb292636221125381</string>
 </resources>

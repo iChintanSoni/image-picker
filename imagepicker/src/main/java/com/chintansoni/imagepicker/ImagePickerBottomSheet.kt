@@ -140,7 +140,6 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
     }
 
     private fun handleImageSourceClick(imageSource: ImageSource?) {
-        println("ImageSource: ${imageSource!!::class.java.simpleName}")
         file = createFile(requireContext())
         when (imageSource) {
             is GallerySource -> {
@@ -169,7 +168,11 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
                     data?.data?.toFile(requireContext(), file)
                 }
                 is FacebookSource -> {
-
+                    (imageSource as? FacebookSource)?.onActivityResult(
+                        requestCode,
+                        resultCode,
+                        data ?: Intent()
+                    )
                 }
             }
 

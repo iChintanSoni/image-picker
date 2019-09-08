@@ -38,7 +38,6 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib:1.3.50"
     implementation 'pub.devrel:easypermissions:3.0.0'
     implementation 'com.google.android.material:material:1.1.0-alpha10'
-    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 
-    compileOnly project(path: ':imagepicker-facebook')
+    implementation project(path: ':imagepicker-facebook')
 }
