@@ -16,35 +16,88 @@
 
 package com.chintansoni.imagepicker
 
-import androidx.fragment.app.Fragment
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.fragment.app.FragmentActivity
-import com.chintansoni.imagepicker.SelectImageBottomSheetDialogFragment.Companion.TAG
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import java.io.File
 
 class ImagePicker(func: Configuration.() -> Unit = {}) {
 
     private val configuration = Configuration()
+    private val onSuccessMutableLiveData = MutableLiveData<OutputData>()
+    private val onFailureMutableLiveData = MutableLiveData<Exception>()
+    private var onFailure: (Exception) -> Unit = {}
 
     init {
         configuration.apply(func)
     }
 
-    fun getImage(fragmentActivity: FragmentActivity, onSuccess: ImageOutput.() -> Unit): ImageTask {
-        val task = ImageTask().apply { onSuccess(onSuccess) }
-        SelectImageBottomSheetDialogFragment.newInstance(configuration).apply {
-            setListener(task)
-        }.show(fragmentActivity.supportFragmentManager, TAG)
-        return task
+    fun getFile(
+        fragmentActivity: FragmentActivity,
+        onSuccess: (File) -> Unit
+    ): ImagePicker {
+        showImagePicker(fragmentActivity.supportFragmentManager, OutputType.FileOutputType)
+        observeLiveData(fragmentActivity, onFileSuccess = onSuccess)
+        return this
     }
 
-    fun getImage(fragment: Fragment, onSuccess: ImageOutput.() -> Unit): ImageTask {
-        val task = ImageTask().apply { onSuccess(onSuccess) }
-        SelectImageBottomSheetDialogFragment.newInstance(configuration).apply {
-            setListener(task)
-        }.show(fragment.childFragmentManager, TAG)
-        return task
+    fun getUri(
+        fragmentActivity: FragmentActivity,
+        onSuccess: (Uri) -> Unit
+    ): ImagePicker {
+        showImagePicker(fragmentActivity.supportFragmentManager, OutputType.UriOutputType)
+        observeLiveData(fragmentActivity, onUriSuccess = onSuccess)
+        return this
     }
 
-    fun configure(func: Configuration.() -> Unit) {
-        configuration.apply(func)
+    fun getBitmap(
+        fragmentActivity: FragmentActivity,
+        onSuccess: (Bitmap) -> Unit
+    ): ImagePicker {
+        showImagePicker(fragmentActivity.supportFragmentManager, OutputType.BitmapOutputType)
+        observeLiveData(fragmentActivity, onBitmapSuccess = onSuccess)
+        return this
+    }
+
+    private fun showImagePicker(fragmentManager: FragmentManager, outputType: OutputType) {
+        ImagePickerBottomSheet.newInstance(configuration).apply {
+            setOutputFormat(outputType)
+            setSuccessFailureLiveData(
+                onSuccessMutableLiveData,
+                onFailureMutableLiveData
+            )
+        }.show(fragmentManager, ImagePickerBottomSheet.TAG)
+    }
+
+    private fun observeLiveData(
+        lifecycleOwner: LifecycleOwner,
+        onFileSuccess: (File) -> Unit = {},
+        onBitmapSuccess: (Bitmap) -> Unit = {},
+        onUriSuccess: (Uri) -> Unit = {}
+    ) {
+        onSuccessMutableLiveData.observe(lifecycleOwner, Observer {
+            when (it) {
+                is OutputData.FileOutputData -> {
+                    onFileSuccess.invoke(it.file)
+                }
+                is OutputData.UriOutputData -> {
+                    onUriSuccess.invoke(it.uri)
+                }
+                is OutputData.BitmapOutputData -> {
+                    onBitmapSuccess.invoke(it.bitmap)
+                }
+            }
+        })
+        onFailureMutableLiveData.observe(lifecycleOwner, Observer {
+            onFailure.invoke(it)
+        })
+    }
+
+    fun onFailure(func: (Exception) -> Unit) {
+        onFailure = func
     }
 }

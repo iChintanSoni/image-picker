@@ -1,10 +1,9 @@
 package com.chintansoni.imagepickersample
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
+import coil.api.load
 import com.chintansoni.imagepicker.ImagePicker
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -17,40 +16,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onImageAsFileClick(view: View) {
-        imagePicker.getImage(this) {
-            Log.e("MainActivity", "Received Result")
-            Glide
-                .with(this@MainActivity)
-                .load(getFile())
-                .into(imageView)
+        imagePicker.getFile(this) {
+            imageView.load(it)
         }.onFailure {
-            Log.e("MainActivity", it.message)
-        }
-
-        imagePicker.getImage(this) {
-
+            it.printStackTrace()
         }
     }
 
     fun onImageAsUriClick(view: View) {
-        imagePicker.getImage(this) {
-            Glide
-                .with(this@MainActivity)
-                .load(getUri())
-                .into(imageView)
+        imagePicker.getUri(this) {
+            imageView.load(it)
         }.onFailure {
-            Log.e("MainActivity", it.message)
+            it.printStackTrace()
         }
     }
 
     fun onImageAsBitmapClick(view: View) {
-        imagePicker.getImage(this) {
-            Glide
-                .with(this@MainActivity)
-                .load(getBitmap())
-                .into(imageView)
+        imagePicker.getBitmap(this) {
+            imageView.load(it)
         }.onFailure {
-            Log.e("MainActivity", it.message)
+            it.printStackTrace()
         }
     }
 }
