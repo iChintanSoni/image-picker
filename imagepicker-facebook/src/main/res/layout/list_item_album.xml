@@ -10,7 +10,6 @@
         android:id="@+id/iv_cover_photo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:scaleType="centerCrop"
         tools:src="@tools:sample/avatars" />
 

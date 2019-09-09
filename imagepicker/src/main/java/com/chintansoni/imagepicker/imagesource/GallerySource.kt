@@ -4,16 +4,20 @@ import android.content.Intent
 import androidx.fragment.app.Fragment
 import com.chintansoni.imagepicker.ImageSource
 import com.chintansoni.imagepicker.R
+import com.chintansoni.imagepicker.exception.NoAppsFoundException
 import java.io.File
 
 internal class GallerySource :
-    ImageSource {
+    ImageSource() {
 
     companion object {
         private const val RC_PICK_PHOTO = 101
     }
 
-    private fun openGallery(fragment: Fragment) {
+    private fun openGallery(
+        fragment: Fragment,
+        onFailure: (Exception) -> Unit
+    ) {
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "image/*"
         }
@@ -23,8 +27,7 @@ internal class GallerySource :
                 RC_PICK_PHOTO
             )
         } else {
-            // TODO: pass error to consumer creating an exception "NoAppsFoundException"
-//            imageTask.onFailureFunc.invoke(Throwable("No apps found that can handle this action"))
+            onFailure.invoke(NoAppsFoundException)
         }
     }
 
@@ -32,7 +35,7 @@ internal class GallerySource :
 
     override fun getTitle(): Int = R.string.gallery
 
-    override fun onClick(fragment: Fragment, file: File) {
-        openGallery(fragment)
+    override fun onClick(fragment: Fragment, file: File, onFailure: (Exception) -> Unit) {
+        openGallery(fragment, onFailure)
     }
 }

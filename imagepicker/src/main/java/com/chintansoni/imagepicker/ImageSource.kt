@@ -1,16 +1,19 @@
 package com.chintansoni.imagepicker
 
+import android.content.Intent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import java.io.File
 
-interface ImageSource {
+abstract class ImageSource {
     @DrawableRes
-    fun getIcon(): Int
+    abstract fun getIcon(): Int
 
     @StringRes
-    fun getTitle(): Int
+    abstract fun getTitle(): Int
 
-    fun onClick(fragment: Fragment, file: File)
+    abstract fun onClick(fragment: Fragment, file: File, onFailure: (Exception) -> Unit = {})
+
+    open fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {}
 }

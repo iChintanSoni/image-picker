@@ -1,13 +1,14 @@
 package com.chintansoni.imagepicker_facebook
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_facebook_album.*
 
 class FacebookAlbumActivity : AppCompatActivity() {
 
     private val albumAdapter = AlbumAdapter {
-
+        Toast.makeText(this, it.name, Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,6 +21,17 @@ class FacebookAlbumActivity : AppCompatActivity() {
     }
 
     private fun fetchAlbums() {
-        FacebookHelper.getAlbums()
+        FacebookHelper.getAlbums {
+            when (it) {
+                is AlbumApiStatus.Loading -> {
+
+                }
+                is AlbumApiStatus.Success -> {
+                    albumAdapter.submitList(it.albumsResponse.data)
+                }
+                is AlbumApiStatus.Failure -> {
+                }
+            }
+        }
     }
 }

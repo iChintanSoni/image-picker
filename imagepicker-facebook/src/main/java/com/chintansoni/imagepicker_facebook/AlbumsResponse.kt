@@ -3,15 +3,16 @@ package com.chintansoni.imagepicker_facebook
 import com.google.gson.annotations.SerializedName
 
 data class DataItem(
-    @SerializedName("cover_photo")
-    val coverPhoto: CoverPhoto,
     @SerializedName("name")
     val name: String = "",
     @SerializedName("count")
     val count: Int = 0,
     @SerializedName("id")
     val id: String = ""
-)
+) {
+    var url: String = ""
+    var albumCoverApiStatus: AlbumCoverApiStatus = AlbumCoverApiStatus.Idle
+}
 
 data class Paging(
     @SerializedName("cursors")
@@ -30,11 +31,4 @@ data class Cursors(
     val before: String = "",
     @SerializedName("after")
     val after: String = ""
-)
-
-data class CoverPhoto(
-    @SerializedName("created_time")
-    val createdTime: String = "",
-    @SerializedName("id")
-    val id: String = ""
 )

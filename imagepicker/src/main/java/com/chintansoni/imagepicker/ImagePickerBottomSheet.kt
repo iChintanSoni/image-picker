@@ -32,7 +32,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import com.chintansoni.imagepicker.exception.UnexpectedOutputTypeException
 import com.chintansoni.imagepicker.imagesource.CameraSource
-import com.chintansoni.imagepicker.imagesource.FacebookSource
 import com.chintansoni.imagepicker.imagesource.GallerySource
 import com.chintansoni.imagepicker.util.FileUtil.createFile
 import com.chintansoni.imagepicker.util.toFile
@@ -86,15 +85,9 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
 
     companion object {
         private const val RC_EXTERNAL_STORAGE = 100
-        private const val BUNDLE_KEY_CONFIG = "config"
         private const val SETTINGS_ACTIVITY_REQUEST_CODE = 659
         internal const val TAG = "ImagePickerBottomSheet"
         private val perms = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-
-        fun newInstance(configuration: Configuration): ImagePickerBottomSheet =
-            ImagePickerBottomSheet().apply {
-                arguments = Bundle().apply { putParcelable(BUNDLE_KEY_CONFIG, configuration) }
-            }
     }
 
     fun setOutputFormat(outputType: OutputType) {
@@ -103,7 +96,6 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        configuration = arguments?.getParcelable(BUNDLE_KEY_CONFIG) ?: Configuration()
         addImageSource()
     }
 
@@ -114,8 +106,9 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
         imageSourceList.add(GallerySource())
         // Add Facebook option
         try {
-            Class.forName("com.chintansoni.imagepicker_facebook.FacebookLoginActivity")
-            imageSourceList.add(FacebookSource())
+            val facebookImageSource =
+                Class.forName("com.chintansoni.imagepicker_facebook.FacebookSource").constructors.first().newInstance() as ImageSource
+            imageSourceList.add(facebookImageSource)
         } catch (exception: ClassNotFoundException) {
 
         }
@@ -148,8 +141,8 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
             is CameraSource -> {
                 imageSource.onClick(this, file)
             }
-            is FacebookSource -> {
-                imageSource.onClick(this, file)
+            else -> {
+                imageSource?.onClick(this, file)
             }
         }
     }
@@ -167,8 +160,8 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
                 is GallerySource -> {
                     data?.data?.toFile(requireContext(), file)
                 }
-                is FacebookSource -> {
-                    (imageSource as? FacebookSource)?.onActivityResult(
+                else -> {
+                    imageSource?.onActivityResult(
                         requestCode,
                         resultCode,
                         data ?: Intent()
@@ -255,5 +248,9 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
     ) {
         this.onSuccessMutableLiveData = onSuccessMutableLiveData
         this.onFailureMutableLiveData = onFailureMutableLiveData
+    }
+
+    fun setConfiguration(configuration: Configuration) {
+        this.configuration = configuration
     }
 }
