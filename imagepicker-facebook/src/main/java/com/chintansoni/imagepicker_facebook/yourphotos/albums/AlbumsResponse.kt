@@ -1,4 +1,4 @@
-package com.chintansoni.imagepicker_facebook
+package com.chintansoni.imagepicker_facebook.yourphotos.albums
 
 import com.google.gson.annotations.SerializedName
 
@@ -11,7 +11,8 @@ data class DataItem(
     val id: String = ""
 ) {
     var url: String = ""
-    var albumCoverApiStatus: AlbumCoverApiStatus = AlbumCoverApiStatus.Idle
+    var albumCoverApiStatus: AlbumCoverApiStatus =
+        AlbumCoverApiStatus.Idle
 }
 
 data class Paging(

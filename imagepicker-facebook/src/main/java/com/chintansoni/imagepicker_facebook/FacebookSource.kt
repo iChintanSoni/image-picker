@@ -3,6 +3,7 @@ package com.chintansoni.imagepicker_facebook
 import android.content.Intent
 import androidx.fragment.app.Fragment
 import com.chintansoni.imagepicker.ImageSource
+import com.chintansoni.imagepicker_facebook.yourphotos.PhotosActivity
 import java.io.File
 
 class FacebookSource : ImageSource() {
@@ -12,7 +13,7 @@ class FacebookSource : ImageSource() {
             fragment.startActivity(
                 Intent(
                     fragment.requireContext(),
-                    FacebookAlbumActivity::class.java
+                    PhotosActivity::class.java
                 )
             )
         } else {
@@ -20,7 +21,7 @@ class FacebookSource : ImageSource() {
                 fragment.startActivity(
                     Intent(
                         fragment.requireContext(),
-                        FacebookAlbumActivity::class.java
+                        PhotosActivity::class.java
                     )
                 )
             }, {

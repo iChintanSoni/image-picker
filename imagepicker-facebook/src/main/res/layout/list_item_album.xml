@@ -6,12 +6,7 @@
     android:orientation="vertical"
     android:padding="8dp">
 
-    <com.chintansoni.imagepicker_facebook.util.SquareImageView
-        android:id="@+id/iv_cover_photo"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        tools:src="@tools:sample/avatars" />
+    <include layout="@layout/list_item_image" />
 
     <TextView
         android:id="@+id/tv_album_name"

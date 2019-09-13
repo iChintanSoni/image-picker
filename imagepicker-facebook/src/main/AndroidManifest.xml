@@ -1,15 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.chintansoni.imagepicker_facebook">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application android:theme="@style/AppTheme">
+        <activity
+            android:name=".yourphotos.PhotosActivity"
+            android:label="@string/title_activity_photos"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name" />
-        <activity
-            android:name=".FacebookAlbumActivity"
-            android:theme="@style/NoActionBar" />
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -28,4 +31,5 @@
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

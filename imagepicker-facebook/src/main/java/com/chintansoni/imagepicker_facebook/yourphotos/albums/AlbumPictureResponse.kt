@@ -1,4 +1,4 @@
-package com.chintansoni.imagepicker_facebook
+package com.chintansoni.imagepicker_facebook.yourphotos.albums
 
 
 import com.google.gson.annotations.SerializedName

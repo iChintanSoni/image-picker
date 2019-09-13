@@ -31,7 +31,6 @@ class ImagePicker(func: Configuration.() -> Unit = {}) {
     private val onSuccessMutableLiveData = MutableLiveData<OutputData>()
     private val onFailureMutableLiveData = MutableLiveData<Exception>()
     private var onFailure: (Exception) -> Unit = {}
-    private val imagePickerBottomSheet = ImagePickerBottomSheet()
 
     init {
         configuration.apply(func)
@@ -65,7 +64,7 @@ class ImagePicker(func: Configuration.() -> Unit = {}) {
     }
 
     private fun showImagePicker(fragmentManager: FragmentManager, outputType: OutputType) {
-        imagePickerBottomSheet.apply {
+        val imagePickerBottomSheet = ImagePickerBottomSheet().apply {
             setOutputFormat(outputType)
             setSuccessFailureLiveData(
                 onSuccessMutableLiveData,
@@ -73,12 +72,12 @@ class ImagePicker(func: Configuration.() -> Unit = {}) {
             )
             setConfiguration(configuration)
         }
-        if (!isPickerShowing()) {
+        if (!isPickerShowing(imagePickerBottomSheet)) {
             imagePickerBottomSheet.show(fragmentManager, ImagePickerBottomSheet.TAG)
         }
     }
 
-    private fun isPickerShowing(): Boolean {
+    private fun isPickerShowing(imagePickerBottomSheet: ImagePickerBottomSheet): Boolean {
         return imagePickerBottomSheet.dialog != null
                 && imagePickerBottomSheet.dialog.isShowing
                 && !imagePickerBottomSheet.isRemoving

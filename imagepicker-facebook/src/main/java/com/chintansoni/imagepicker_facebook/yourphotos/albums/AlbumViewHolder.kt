@@ -1,10 +1,12 @@
-package com.chintansoni.imagepicker_facebook
+package com.chintansoni.imagepicker_facebook.yourphotos.albums
 
 import android.view.View
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.api.load
+import com.chintansoni.imagepicker_facebook.FacebookHelper
+import com.chintansoni.imagepicker_facebook.R
 
 class AlbumViewHolder(private val view: View, private val onClick: (DataItem) -> Unit) :
     RecyclerView.ViewHolder(view) {

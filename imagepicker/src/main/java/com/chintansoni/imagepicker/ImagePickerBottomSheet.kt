@@ -38,7 +38,6 @@ import com.chintansoni.imagepicker.util.toFile
 import com.chintansoni.imagepicker.util.toUri
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.bottomsheet_image_picker.*
-import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.File
 
@@ -58,8 +57,6 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
     private val asyncTask = @SuppressLint("StaticFieldLeak")
     object : AsyncTask<OutputType, Void, OutputData>() {
         override fun doInBackground(vararg outputType: OutputType?): OutputData? {
-
-            // Respond Accordingly
             return when (outputType[0]) {
                 is OutputType.FileOutputType -> OutputData.FileOutputData(file)
                 is OutputType.BitmapOutputType -> OutputData.BitmapOutputData(
@@ -126,6 +123,7 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
         super.onViewCreated(view, savedInstanceState)
         val imageSourceAdapter = ImageSourceAdapter {
             imageSource = it
+            file = createFile(requireContext())
             handleImageSourceClick(imageSource)
         }
         rv_image_picker.adapter = imageSourceAdapter
@@ -133,13 +131,9 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
     }
 
     private fun handleImageSourceClick(imageSource: ImageSource?) {
-        file = createFile(requireContext())
         when (imageSource) {
             is GallerySource -> {
                 invokePermissionModel(this)
-            }
-            is CameraSource -> {
-                imageSource.onClick(this, file)
             }
             else -> {
                 imageSource?.onClick(this, file)
@@ -149,14 +143,11 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
+        if (requestCode == SETTINGS_ACTIVITY_REQUEST_CODE) {
             handleImageSourceClick(imageSource)
         } else {
             // Save file as common output
             when (imageSource) {
-                is CameraSource -> {
-
-                }
                 is GallerySource -> {
                     data?.data?.toFile(requireContext(), file)
                 }

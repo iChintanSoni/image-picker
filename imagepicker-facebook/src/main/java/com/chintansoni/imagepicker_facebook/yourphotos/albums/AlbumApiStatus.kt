@@ -1,4 +1,4 @@
-package com.chintansoni.imagepicker_facebook
+package com.chintansoni.imagepicker_facebook.yourphotos.albums
 
 sealed class AlbumApiStatus {
     object Loading : AlbumApiStatus()

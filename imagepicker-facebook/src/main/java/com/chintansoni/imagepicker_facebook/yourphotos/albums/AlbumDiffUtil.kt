@@ -1,4 +1,4 @@
-package com.chintansoni.imagepicker_facebook
+package com.chintansoni.imagepicker_facebook.yourphotos.albums
 
 import androidx.recyclerview.widget.DiffUtil
 

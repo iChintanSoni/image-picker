@@ -3,4 +3,8 @@
     <string name="facebook_app_id"></string>
     <string name="fb_login_protocol_scheme"></string>
     <string name="facebook">Facebook</string>
+    <string name="title_activity_photos">Your Photos</string>
+    <string name="action_settings">Settings</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
 </resources>

@@ -8,6 +8,8 @@ import android.util.Base64
 import android.util.Log
 import androidx.fragment.app.Fragment
 import com.chintansoni.imagepicker_facebook.exception.FacebookLoginCancelledException
+import com.chintansoni.imagepicker_facebook.yourphotos.albums.*
+import com.chintansoni.imagepicker_facebook.yourphotos.photos.UserImagesResponse
 import com.facebook.*
 import com.facebook.AccessToken
 import com.facebook.login.LoginManager
@@ -17,6 +19,7 @@ import timber.log.Timber
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
+
 object FacebookHelper {
 
     init {
@@ -25,6 +28,7 @@ object FacebookHelper {
 
     private val readPermissionList = listOf("public_profile, email, user_photos")
     private var mCallbackManager: CallbackManager? = null
+    private var userImagesGraphResponse: GraphResponse? = null
 
     fun isLoggedIn(): Boolean {
         val accessToken = AccessToken.getCurrentAccessToken()
@@ -108,6 +112,54 @@ object FacebookHelper {
                 }
             ).executeAsync()
         }
+    }
+
+    fun getAlbumImages(dataItem: DataItem, onCoverApi: () -> Unit) {
+        if (dataItem.albumCoverApiStatus == AlbumCoverApiStatus.Idle) {
+            dataItem.albumCoverApiStatus = AlbumCoverApiStatus.Loading
+            val params = Bundle()
+            params.putString("type", "album")
+            params.putBoolean("redirect", false)
+            GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                "/${dataItem.id}/picture",
+                params,
+                HttpMethod.GET,
+                GraphRequest.Callback { graphResponse ->
+                    graphResponse.error?.exception?.let {
+                        dataItem.albumCoverApiStatus = AlbumCoverApiStatus.Failure(it)
+                    }
+                    graphResponse.rawResponse?.let {
+                        val albumPictureResponse =
+                            Gson().fromJson(
+                                graphResponse.rawResponse,
+                                AlbumPictureResponse::class.java
+                            )
+                        dataItem.url = albumPictureResponse.data.url
+                        dataItem.albumCoverApiStatus =
+                            AlbumCoverApiStatus.Success(albumPictureResponse)
+                        onCoverApi()
+                    }
+                }
+            ).executeAsync()
+        }
+    }
+
+    fun getUserImages(onUserImagesResponse: (UserImagesResponse) -> Unit) {
+        val request = GraphRequest.newGraphPathRequest(
+            AccessToken.getCurrentAccessToken(),
+            "/me/photos"
+        ) {
+            userImagesGraphResponse = it
+            val response = Gson().fromJson(it.rawResponse, UserImagesResponse::class.java)
+            onUserImagesResponse(response)
+        }
+
+        val parameters = Bundle()
+        parameters.putString("fields", "images")
+        parameters.putString("limit", "10")
+        request.parameters = parameters
+        request.executeAsync()
     }
 
     fun generateHashKey(context: Context) {
