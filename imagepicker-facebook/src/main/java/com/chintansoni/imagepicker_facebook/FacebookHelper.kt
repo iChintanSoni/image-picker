@@ -12,6 +12,7 @@ import com.chintansoni.imagepicker_facebook.yourphotos.albums.*
 import com.chintansoni.imagepicker_facebook.yourphotos.photos.UserImagesResponse
 import com.facebook.*
 import com.facebook.AccessToken
+import com.facebook.GraphResponse
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.google.gson.Gson
@@ -157,9 +158,21 @@ object FacebookHelper {
 
         val parameters = Bundle()
         parameters.putString("fields", "images")
-        parameters.putString("limit", "10")
+        parameters.putString("limit", "20")
         request.parameters = parameters
         request.executeAsync()
+    }
+
+    fun pageUserImages(onUserImagesResponse: (UserImagesResponse) -> Unit) {
+        userImagesGraphResponse?.getRequestForPagedResults(GraphResponse.PagingDirection.NEXT)
+            ?.apply {
+                callback = GraphRequest.Callback {
+                    userImagesGraphResponse = it
+                    val response = Gson().fromJson(it.rawResponse, UserImagesResponse::class.java)
+                    onUserImagesResponse(response)
+                }
+                executeAsync()
+            }
     }
 
     fun generateHashKey(context: Context) {
