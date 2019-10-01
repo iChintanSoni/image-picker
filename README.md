@@ -1,4 +1,10 @@
 # image-picker
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-2196F3.svg?style=for-the-badge)](https://opensource.org/licenses/Apache-2.0)
+[![language](https://img.shields.io/github/languages/top/BirjuVachhani/location-extension-android.svg?style=for-the-badge&colorB=f18e33)](https://kotlinlang.org/)
+[![Platform](https://img.shields.io/badge/Platform-Android-green.svg?style=for-the-badge)](https://www.android.com/)
+[![API](https://img.shields.io/badge/API-17%2B-F44336.svg?style=for-the-badge)](https://android-arsenal.com/api?level=16)
+
 Image Picker, a tiny Kotlin Android library that allows developers to implement image picking stuff, in merely 3 lines of code.
 
 ## Features
@@ -23,7 +29,7 @@ allprojects {
 *Step 2.* Add the dependency
   ```groovy
 	dependencies {
-	    implementation 'com.github.iChintanSoni:image-picker:1.0.1'
+	    implementation 'com.github.iChintanSoni:image-picker:2.0.0-alpha01'
 	}
   ```
 ## Usage
