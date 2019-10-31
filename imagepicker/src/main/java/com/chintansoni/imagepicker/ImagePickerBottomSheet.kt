@@ -140,7 +140,6 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
     }
 
     private fun handleImageSourceClick(imageSource: ImageSource?) {
-        println("ImageSource: ${imageSource!!::class.java.simpleName}")
         file = createFile(requireContext())
         when (imageSource) {
             is GallerySource -> {
