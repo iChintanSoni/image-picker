@@ -34,10 +34,10 @@ androidExtensions {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly 'androidx.appcompat:appcompat:1.0.2'
+    compileOnly 'androidx.appcompat:appcompat:1.1.0'
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'pub.devrel:easypermissions:3.0.0'
-    implementation 'com.google.android.material:material:1.1.0-alpha10'
+    implementation 'com.google.android.material:material:1.2.0-alpha01'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 
     compileOnly project(path: ':imagepicker-facebook')
