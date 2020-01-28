@@ -16,21 +16,98 @@
 
 package com.chintansoni.imagepicker
 
-import androidx.fragment.app.Fragment
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.fragment.app.FragmentActivity
-import com.chintansoni.imagepicker.SelectImageBottomSheetDialogFragment.Companion.TAG
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import java.io.File
 
-class ImagePicker {
+class ImagePicker(func: Configuration.() -> Unit = {}) {
 
-    fun getImage(fragmentActivity: FragmentActivity, configuration: Configuration, function: (Result) -> Unit) {
-        SelectImageBottomSheetDialogFragment.newInstance(configuration).apply {
-            setListener(function)
-        }.show(fragmentActivity.supportFragmentManager, TAG)
+    private val configuration = Configuration()
+    private val onSuccessMutableLiveData = MutableLiveData<OutputData>()
+    private val onFailureMutableLiveData = MutableLiveData<Exception>()
+    private var onFailure: (Exception) -> Unit = {}
+
+    init {
+        configuration.apply(func)
     }
 
-    fun getImage(fragment: Fragment, configuration: Configuration, function: (Result) -> Unit) {
-        SelectImageBottomSheetDialogFragment.newInstance(configuration).apply {
-            setListener(function)
-        }.show(fragment.childFragmentManager, TAG)
+    fun getFile(
+        fragmentActivity: FragmentActivity,
+        onSuccess: (File) -> Unit
+    ): ImagePicker {
+        showImagePicker(fragmentActivity.supportFragmentManager, OutputType.FileOutputType)
+        observeLiveData(fragmentActivity, onFileSuccess = onSuccess)
+        return this
+    }
+
+    fun getUri(
+        fragmentActivity: FragmentActivity,
+        onSuccess: (Uri) -> Unit
+    ): ImagePicker {
+        showImagePicker(fragmentActivity.supportFragmentManager, OutputType.UriOutputType)
+        observeLiveData(fragmentActivity, onUriSuccess = onSuccess)
+        return this
+    }
+
+    fun getBitmap(
+        fragmentActivity: FragmentActivity,
+        onSuccess: (Bitmap) -> Unit
+    ): ImagePicker {
+        showImagePicker(fragmentActivity.supportFragmentManager, OutputType.BitmapOutputType)
+        observeLiveData(fragmentActivity, onBitmapSuccess = onSuccess)
+        return this
+    }
+
+    private fun showImagePicker(fragmentManager: FragmentManager, outputType: OutputType) {
+        val imagePickerBottomSheet = ImagePickerBottomSheet().apply {
+            setOutputFormat(outputType)
+            setSuccessFailureLiveData(
+                onSuccessMutableLiveData,
+                onFailureMutableLiveData
+            )
+            setConfiguration(configuration)
+        }
+        if (!isPickerShowing(imagePickerBottomSheet)) {
+            imagePickerBottomSheet.show(fragmentManager, ImagePickerBottomSheet.TAG)
+        }
+    }
+
+    private fun isPickerShowing(imagePickerBottomSheet: ImagePickerBottomSheet): Boolean {
+        return imagePickerBottomSheet.dialog != null
+                && imagePickerBottomSheet.dialog.isShowing
+                && !imagePickerBottomSheet.isRemoving
+    }
+
+    private fun observeLiveData(
+        lifecycleOwner: LifecycleOwner,
+        onFileSuccess: (File) -> Unit = {},
+        onBitmapSuccess: (Bitmap) -> Unit = {},
+        onUriSuccess: (Uri) -> Unit = {}
+    ) {
+        onSuccessMutableLiveData.observe(lifecycleOwner, Observer {
+            when (it) {
+                is OutputData.FileOutputData -> {
+                    onFileSuccess.invoke(it.file)
+                }
+                is OutputData.UriOutputData -> {
+                    onUriSuccess.invoke(it.uri)
+                }
+                is OutputData.BitmapOutputData -> {
+                    onBitmapSuccess.invoke(it.bitmap)
+                }
+            }
+        })
+        onFailureMutableLiveData.observe(lifecycleOwner, Observer {
+            onFailure.invoke(it)
+        })
+    }
+
+    fun onFailure(func: (Exception) -> Unit) {
+        onFailure = func
     }
 }
