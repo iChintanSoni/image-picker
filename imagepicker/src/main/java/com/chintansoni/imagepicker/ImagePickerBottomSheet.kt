@@ -32,14 +32,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import com.chintansoni.imagepicker.exception.UnexpectedOutputTypeException
 import com.chintansoni.imagepicker.imagesource.CameraSource
-import com.chintansoni.imagepicker.imagesource.FacebookSource
 import com.chintansoni.imagepicker.imagesource.GallerySource
 import com.chintansoni.imagepicker.util.FileUtil.createFile
 import com.chintansoni.imagepicker.util.toFile
 import com.chintansoni.imagepicker.util.toUri
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.bottomsheet_image_picker.*
-import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.File
 
@@ -59,8 +57,6 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
     private val asyncTask = @SuppressLint("StaticFieldLeak")
     object : AsyncTask<OutputType, Void, OutputData>() {
         override fun doInBackground(vararg outputType: OutputType?): OutputData? {
-
-            // Respond Accordingly
             return when (outputType[0]) {
                 is OutputType.FileOutputType -> OutputData.FileOutputData(file)
                 is OutputType.BitmapOutputType -> OutputData.BitmapOutputData(
@@ -86,15 +82,9 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
 
     companion object {
         private const val RC_EXTERNAL_STORAGE = 100
-        private const val BUNDLE_KEY_CONFIG = "config"
         private const val SETTINGS_ACTIVITY_REQUEST_CODE = 659
         internal const val TAG = "ImagePickerBottomSheet"
         private val perms = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-
-        fun newInstance(configuration: Configuration): ImagePickerBottomSheet =
-            ImagePickerBottomSheet().apply {
-                arguments = Bundle().apply { putParcelable(BUNDLE_KEY_CONFIG, configuration) }
-            }
     }
 
     fun setOutputFormat(outputType: OutputType) {
@@ -103,7 +93,6 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        configuration = arguments?.getParcelable(BUNDLE_KEY_CONFIG) ?: Configuration()
         addImageSource()
     }
 
@@ -114,8 +103,9 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
         imageSourceList.add(GallerySource())
         // Add Facebook option
         try {
-            Class.forName("com.chintansoni.imagepicker_facebook.FacebookLoginActivity")
-            imageSourceList.add(FacebookSource())
+            val facebookImageSource =
+                Class.forName("com.chintansoni.imagepicker_facebook.FacebookSource").constructors.first().newInstance() as ImageSource
+            imageSourceList.add(facebookImageSource)
         } catch (exception: ClassNotFoundException) {
 
         }
@@ -133,6 +123,7 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
         super.onViewCreated(view, savedInstanceState)
         val imageSourceAdapter = ImageSourceAdapter {
             imageSource = it
+            file = createFile(requireContext())
             handleImageSourceClick(imageSource)
         }
         rv_image_picker.adapter = imageSourceAdapter
@@ -140,35 +131,32 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
     }
 
     private fun handleImageSourceClick(imageSource: ImageSource?) {
-        file = createFile(requireContext())
         when (imageSource) {
             is GallerySource -> {
                 invokePermissionModel(this)
             }
-            is CameraSource -> {
-                imageSource.onClick(this, file)
-            }
-            is FacebookSource -> {
-                imageSource.onClick(this, file)
+            else -> {
+                imageSource?.onClick(this, file)
             }
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
+        if (requestCode == SETTINGS_ACTIVITY_REQUEST_CODE) {
             handleImageSourceClick(imageSource)
         } else {
             // Save file as common output
             when (imageSource) {
-                is CameraSource -> {
-
-                }
                 is GallerySource -> {
                     data?.data?.toFile(requireContext(), file)
                 }
-                is FacebookSource -> {
-
+                else -> {
+                    imageSource?.onActivityResult(
+                        requestCode,
+                        resultCode,
+                        data ?: Intent()
+                    )
                 }
             }
 
@@ -251,5 +239,9 @@ internal class ImagePickerBottomSheet : BottomSheetDialogFragment(),
     ) {
         this.onSuccessMutableLiveData = onSuccessMutableLiveData
         this.onFailureMutableLiveData = onFailureMutableLiveData
+    }
+
+    fun setConfiguration(configuration: Configuration) {
+        this.configuration = configuration
     }
 }

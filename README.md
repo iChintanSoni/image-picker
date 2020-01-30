@@ -20,7 +20,6 @@ Add it in your root build.gradle at the end of repositories:
   ```groovy
 allprojects {
     repositories {
-        …
         maven { url 'https://jitpack.io' }
     }
 }
@@ -34,57 +33,36 @@ allprojects {
   ```
 ## Usage
 
-#### Apply desired output format in `Configuration`:
-```kotlin
-// If you want File as output
-val configuration = Configuration(target = Target.FileTarget)
-
-// If you want Uri as output
-val configuration = Configuration(target = Target.UriTarget)
-
-// If you want Bitmap as output
-val configuration = Configuration(target = Target.BitmapTarget)
-```
-
 #### Get image in your Activity/Fragment:
 ```kotlin
-imagePicker.getImage(this, configuration) {
-    when (it) {
-        is Result.Success -> {
-            processResult(it.output)
-        }
-        is Result.Failure -> {
-            Toast.makeText(this, it.throwable.message, Toast.LENGTH_SHORT).show()
-        }
-    }
+val imagePicker = ImagePicker()
+imagePicker.getImage(this) {
+    getBitmap() // Image as Bitmap
+    getFile() // Image as File
+    getUri() // Image as Uri
+}.onFailure {
+    // something went wrong!
 }
 ```
-#### Process the output:
+
+#### Changing default configurations:
+
+Method: 1
 ```kotlin
-private fun processResult(output: Output) {
-    when (output) {
-        is Output.FileOutput -> {
-            Glide
-                .with(this)
-                .load(output.data)
-                .into(imageView)
-        }
-        is Output.UriOutput -> {
-            Glide
-                .with(this)
-                .load(output.data)
-                .into(imageView)
-        }
-        is Output.BitmapOutput -> {
-            Glide
-                .with(this)
-                .load(output.data)
-                .into(imageView)
-        }
-    }
+private val imagePicker = ImagePicker {
+    rationaleText = "This is custom rationale text"
+    blockedText = "This is custom permission blocked text"
 }
 ```
-  
+
+Method: 2
+```kotlin
+imagePicker.configure {
+    rationaleText = "This is custom rationale text"
+    blockedText = "This is custom permission blocked text"
+}
+```
+
 # License
 
 ```

@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 29
     defaultConfig {
-        minSdkVersion 17
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -22,8 +22,25 @@ android {
     }
 }
 
+androidExtensions {
+    experimental = true
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
 dependencies {
     compileOnly fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compileOnly 'androidx.appcompat:appcompat:1.1.0'
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'com.facebook.android:facebook-login:5.13.0'
+    implementation 'com.google.android.material:material:1.2.0-alpha04'
+    implementation("io.coil-kt:coil:0.7.0")
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+    compileOnly project(path: ':imagepicker')
+
 }

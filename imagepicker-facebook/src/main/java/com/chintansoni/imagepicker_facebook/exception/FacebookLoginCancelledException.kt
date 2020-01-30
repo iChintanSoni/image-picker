@@ -1,0 +1,5 @@
+package com.chintansoni.imagepicker_facebook.exception
+
+const val MESSAGE_FACEBOOK_LOGIN_CANCELLED_EXCEPTION = "Facebook Login Cancelled"
+
+object FacebookLoginCancelledException : Exception(MESSAGE_FACEBOOK_LOGIN_CANCELLED_EXCEPTION)
